@@ -12,3 +12,34 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  email     String   @unique
+  telefono  String?
+  role Roles
+  creadoEn  DateTime @default(now())
+  editadoEn DateTime @updatedAt
+  addresses Address[]
+}
+
+model Address {
+  id        Int      @id @default(autoincrement())
+  city      String
+  zip       String
+  address   String
+  address2  String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Roles {
+    ADMIN
+    CLIENT
+}
+
+
