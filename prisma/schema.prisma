@@ -24,7 +24,7 @@ model User {
   role Roles
   creadoEn  DateTime @default(now())
   editadoEn DateTime @updatedAt
-  addresses Address[]
+  address   Address? @relation
 }
 
 model Address {
@@ -33,7 +33,7 @@ model Address {
   zip       String
   address   String
   address2  String?
-  userId    Int
+  userId    Int      @unique  // Esta es la clave foránea que asegura la relación 1 a 1
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
