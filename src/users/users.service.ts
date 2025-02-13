@@ -38,7 +38,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         },
       });
 
-      const { editadoEn, id, ...resData } = createUser;
+      const { editadoEn, ...resData } = createUser;
 
       return resData;
     } catch (error) {
@@ -100,15 +100,6 @@ export class UsersService extends PrismaClient implements OnModuleInit {
           status: 404,
           message: 'User not found',
         });
-      }
-
-      const direccion = await this.address.findFirst({ where: { user } });
-
-      if (direccion) {
-        return {
-          ...user,
-          direccion,
-        };
       }
 
       return user;
