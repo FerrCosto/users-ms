@@ -22,7 +22,7 @@ export class Direccion {
   address2?: string;
 }
 export class UpdateUserDto {
-  id: number;
+  id: string;
 
   @IsString()
   @IsOptional()

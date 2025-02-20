@@ -6,7 +6,6 @@ export class CreateUserDto {
   fullName: string;
   @IsEmail()
   email: string;
-
-  @IsEnum(Roles, { each: true })
-  roles: Roles = Roles.CLIENT;
+  @IsString()
+  password: string;
 }

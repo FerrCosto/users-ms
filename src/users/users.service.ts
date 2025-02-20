@@ -1,11 +1,12 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-
-import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import { PrismaClient, Roles } from '@prisma/client';
 import { envs } from 'src/config/envs.config';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { RpcException } from '@nestjs/microservices';
 import { User } from './entities';
-import { Roles } from 'src/enums/roles-user.enum';
+
+import { VerifyUserDto } from './dto/verify-user.dto';
 
 @Injectable()
 export class UsersService extends PrismaClient implements OnModuleInit {
@@ -34,11 +35,13 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         data: {
           email: createUserDto.email,
           fullName: createUserDto.fullName,
-          role: createUserDto.roles,
+          role: Roles.CLIENT,
+          password: bcrypt.hashSync(createUserDto.password, 10),
         },
       });
 
-      const { editadoEn, ...resData } = createUser;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { editadoEn, creadoEn, password, ...resData } = createUser;
 
       return resData;
     } catch (error) {
@@ -48,6 +51,31 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         message: 'Revisar los logs del servidor',
       });
     }
+  }
+
+  async verifyUser(verifyUserDto: VerifyUserDto): Promise<User> {
+    const { email, password } = verifyUserDto;
+    const user = await this.user.findFirst({ where: { email } });
+
+    if (!user) {
+      throw new RpcException({
+        status: 400,
+        message: 'Email/Password not valid',
+      });
+    }
+
+    const verifyPassword = bcrypt.compareSync(password, user.password);
+
+    if (!verifyPassword)
+      throw new RpcException({
+        status: 400,
+        message: `Email/Password not valid`,
+      });
+
+    const { password: _password, creadoEn, editadoEn, ...resData } = user;
+    return {
+      ...resData,
+    };
   }
 
   async findAll(): Promise<User[]> {
@@ -60,7 +88,10 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         });
       }
 
-      return users;
+      return users.map((user) => {
+        const { password, ...resData } = user;
+        return resData;
+      });
     } catch (error) {
       console.log(error);
       throw new RpcException({
@@ -70,7 +101,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     }
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOne(id: string): Promise<User> {
     try {
       const user = await this.user.findFirst({ where: { id } });
 
@@ -81,7 +112,8 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         });
       }
 
-      return user;
+      const { password, ...resData } = user;
+      return resData;
     } catch (error) {
       console.log(error);
       throw new RpcException({
@@ -102,7 +134,8 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         });
       }
 
-      return user;
+      const { password, ...resData } = user;
+      return resData;
     } catch (error) {
       console.log(error);
       throw new RpcException({
@@ -112,7 +145,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     }
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     try {
       const { direccion, email, fullName, role, telefono } = updateUserDto;
       const user = await this.user.findFirst({ where: { id } });
@@ -127,18 +160,16 @@ export class UsersService extends PrismaClient implements OnModuleInit {
       await this.user.update({
         where: { id },
         data: {
-          id,
           ...(direccion && {
             addresses: {
-              updateMany: {
-                where: { userId: id },
-                data: {
+              set: [
+                {
                   address: direccion.address,
                   address2: direccion.address2 || null,
                   city: direccion.city,
                   zip: direccion.zip,
                 },
-              },
+              ],
             },
           }),
           ...(telefono && { telefono }),
@@ -157,7 +188,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     }
   }
 
-  async remove(id: number): Promise<RpcException> {
+  async remove(id: string): Promise<RpcException> {
     try {
       const user = this.user.findFirst({ where: { id } });
 
