@@ -1,5 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto';
 import {
   IsEmail,
   IsEnum,
@@ -31,9 +29,6 @@ export class UpdateUserDto {
   @IsOptional()
   email?: string;
 
-  @IsEnum(Roles, { each: true })
-  @IsOptional()
-  role?: Roles;
   @IsOptional()
   @IsString()
   telefono?: string;
@@ -42,4 +37,12 @@ export class UpdateUserDto {
   @IsOptional()
   @Type(() => Direccion)
   direccion?: Direccion;
+}
+
+export class UpdateUserRoleDto {
+  @IsString()
+  id: string;
+  @IsEnum(Roles, { each: true })
+  @IsOptional()
+  role?: Roles;
 }

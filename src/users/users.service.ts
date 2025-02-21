@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaClient, Roles } from '@prisma/client';
 import { envs } from 'src/config/envs.config';
-import { CreateUserDto, UpdateUserDto } from './dto';
+import { CreateUserDto, UpdateUserDto, UpdateUserRoleDto } from './dto';
 import { RpcException } from '@nestjs/microservices';
 import { User } from './entities';
 
@@ -147,7 +147,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     try {
-      const { direccion, email, fullName, role, telefono } = updateUserDto;
+      const { direccion, email, fullName, telefono } = updateUserDto;
       const user = await this.user.findFirst({ where: { id } });
 
       if (!user) {
@@ -184,6 +184,25 @@ export class UsersService extends PrismaClient implements OnModuleInit {
       throw new RpcException({
         status: 500,
         message: 'Revisar los logs del servidor',
+      });
+    }
+  }
+
+  async updateRole(
+    id: string,
+    updateUserRoleDto: UpdateUserRoleDto,
+  ): Promise<User> {
+    try {
+      await this.user.update({
+        where: { id },
+        data: { role: updateUserRoleDto.role },
+      });
+      return this.findOne(id);
+    } catch (error) {
+      console.log(error);
+      throw new RpcException({
+        status: 500,
+        message: 'Mirar los logs',
       });
     }
   }
