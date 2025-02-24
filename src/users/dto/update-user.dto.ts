@@ -20,6 +20,7 @@ export class Direccion {
   address2?: string;
 }
 export class UpdateUserDto {
+  @IsString()
   id: string;
 
   @IsString()

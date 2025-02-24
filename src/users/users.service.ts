@@ -178,7 +178,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         },
       });
 
-      return await this.findOne(id);
+      return this.findOne(id);
     } catch (error) {
       console.log(error);
       throw new RpcException({
