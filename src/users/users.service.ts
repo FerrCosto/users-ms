@@ -73,6 +73,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
       });
 
     const { password: _password, creadoEn, editadoEn, ...resData } = user;
+
     return {
       ...resData,
     };
