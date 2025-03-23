@@ -48,6 +48,11 @@ export class UsersController {
     return this.usersService.updateRole(updateUserDto.id, updateUserDto);
   }
 
+  @MessagePattern('user.count')
+  countUsers() {
+    return this.usersService.countUsers();
+  }
+
   @MessagePattern('user.remove')
   remove(@Payload() id: string) {
     return this.usersService.remove(id);

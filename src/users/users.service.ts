@@ -208,6 +208,21 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     }
   }
 
+  async countUsers() {
+    try {
+      const totalUsers = await this.user.count();
+      return {
+        totalUsers,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new RpcException({
+        status: 500,
+        message: 'Mirar los logs',
+      });
+    }
+  }
+
   async remove(id: string): Promise<RpcException> {
     try {
       const user = this.user.findFirst({ where: { id } });
