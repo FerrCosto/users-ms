@@ -79,7 +79,7 @@ export class UsersService extends PrismaClient implements OnModuleInit {
     };
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll() {
     try {
       const users = await this.user.findMany();
       if (!users) {
@@ -89,10 +89,12 @@ export class UsersService extends PrismaClient implements OnModuleInit {
         });
       }
 
-      return users.map((user) => {
-        const { password, ...resData } = user;
-        return resData;
-      });
+      return {
+        users: users.map((user) => {
+          const { password, addresses, ...resData } = user;
+          return resData;
+        }),
+      };
     } catch (error) {
       console.log(error);
       throw new RpcException({
